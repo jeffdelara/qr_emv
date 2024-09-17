@@ -13,23 +13,13 @@ module QrEmv
       @root = {}
       @merchant_info = {}
 
+      process
+    end
+
+    def process 
       parse_root
       parse_merchant_info
     end
-
-    def parse_root
-      attrs = parse(data: @raw_string)
-
-      @root = attrs
-    end
-
-    def parse_merchant_info
-      parsed_merchant_info = parse(data: @root['27'])
-
-      @merchant_info = parsed_merchant_info
-    end
-
-    private
 
     def parse(data:)
       attrs = {}
@@ -42,11 +32,9 @@ module QrEmv
         case current_cursor 
         when :id
           ids << c
-
           current_cursor = :length if ids.size == 2
         when :length
           lengths << c
-
           current_cursor = :value if lengths.size == 2
         when :value
           value_counter = lengths.join.to_i
@@ -65,6 +53,18 @@ module QrEmv
       end
 
       attrs
+    end
+
+    private
+
+    def parse_root
+      attrs = parse(data: @raw_string)
+      @root = attrs
+    end
+
+    def parse_merchant_info
+      parsed_merchant_info = parse(data: @root['27'])
+      @merchant_info = parsed_merchant_info
     end
   end
 end
